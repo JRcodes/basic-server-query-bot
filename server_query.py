@@ -137,7 +137,7 @@ class ServerQuery:
                 except Exception:
                     error_type = sys.exc_info()[0]
                     logging.error(
-                        f"The endpoint: {line} could not be reached becaused of the following reason {error_type.__name__}"
+                        f"The endpoint: {line} could not be reached because of the following reason {error_type.__name__} \n"
                     )
                 self.output(
                     application=application,
