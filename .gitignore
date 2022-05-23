@@ -1,2 +1,8 @@
 # Virtual Environments
 /.venv/
+
+# Excluded Files
+output.json
+test_text.txt 
+responses.txt 
+
