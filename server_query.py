@@ -38,18 +38,32 @@ class ServerQuery:
                 ]
                 success_rates.append(success_rate)
                 application_name["Versions"].update(
-                    {version: {"success_rates": success_rates}}
+                    {
+                        version: {
+                            "success_rates": success_rates,
+                            "average_success_rate": sum(success_rates)
+                            / len(success_rates),
+                        }
+                    }
                 )
             else:
                 application_name["Versions"].update(
-                    {version: {"success_rates": [success_rate]}}
+                    {
+                        version: {
+                            "success_rates": [success_rate],
+                            "average_success_rate": success_rate,
+                        }
+                    }
                 )
         else:
             self.server_status_tracker.update(
                 {
                     application: {
                         "Versions": {
-                            version: {"success_rates": [success_rate]},
+                            version: {
+                                "success_rates": [success_rate],
+                                "average_success_rate": success_rate,
+                            },
                         }
                     }
                 }

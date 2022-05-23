@@ -16,9 +16,8 @@ def json_dumper(dict_object):
 
 def main():
     querybot = ServerQuery()
-    output = querybot.main(file_path)  ## Remove variable assignment
+    output = querybot.main(file_path)
     json_dumper(dict_object=output)
-    print(output)  ## Test remove
 
 
 if __name__ == "__main__":
