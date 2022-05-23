@@ -1,4 +1,4 @@
-import logging, requests, os, json
+import logging, requests, sys
 
 logging.basicConfig(
     level=logging.INFO,
@@ -12,6 +12,22 @@ class ServerQuery:
         self.server_status_tracker = {}
 
     def query(self, server_endpoint):
+        """
+        This method queries a given server endpoint through an http request
+        Parameters:
+        -----------
+        server_endpoint: str
+            a server_name or url
+
+        Returns:
+        --------
+        application_name: str
+            the application name in response
+        application_version: str
+            the version of the application
+        success_rate: float
+            the number of successful requests per request count
+        """
         logging.info(f"querying {server_endpoint}...")
         response = requests.get(server_endpoint)
         application_name = response.json().get("Application")
@@ -30,12 +46,35 @@ class ServerQuery:
         return application_name, application_version, success_rate
 
     def output(self, application, version, success_rate):
+        """
+        This method generates a dictionary output with information perataining to each application
+        at a version and success rate level
+        Parameters:
+        -----------
+        application_name: str
+            the application name in response
+        application_version: str
+            the version of the application
+        success_rate: float
+            the number of successful requests per request count
+
+        Returns:
+        --------
+        server_status_tracker: dict
+            dictionary with information on each application with versions and success rates
+        """
+
         if self.server_status_tracker.get(application):
             application_name = self.server_status_tracker[application]
+
+            # Check if this version of application is already entered
             if version in application_name["Versions"].keys():
                 success_rates = application_name["Versions"][version][
                     "success_rates"
                 ]
+
+                # Append the success rate to the list of success rates for this version and
+                # update the application with new version info
                 success_rates.append(success_rate)
                 application_name["Versions"].update(
                     {
@@ -47,6 +86,7 @@ class ServerQuery:
                     }
                 )
             else:
+                # Just update application with new version info
                 application_name["Versions"].update(
                     {
                         version: {
@@ -56,6 +96,7 @@ class ServerQuery:
                     }
                 )
         else:
+            # Create a new application key
             self.server_status_tracker.update(
                 {
                     application: {
@@ -71,13 +112,33 @@ class ServerQuery:
 
         return self.server_status_tracker
 
-    def main(self, file_name):
-        with open(file_name, "r") as file:
+    def main(self, file_path):
+        """
+        This method generates a dictionary output with information perataining to each application
+        at a version and success rate level
+        Parameters:
+        -----------
+        file_path: str
+            path to txt file containing servers
+
+        Returns:
+        --------
+        server_status_tracker: dict
+            dictionary with information on each application with versions and success rates
+        """
+        with open(file_path, "r") as file:
             for line in file.readlines():
                 line = line.rstrip().lstrip()
-                application, version, success_rate = self.query(
-                    server_endpoint=line
-                )
+                # We want to capture and handle exceptions and continue querying other endpoints
+                try:
+                    application, version, success_rate = self.query(
+                        server_endpoint=line
+                    )
+                except Exception:
+                    error_type = sys.exc_info()[0]
+                    logging.error(
+                        f"The endpoint: {line} could not be reached becaused of the following reason {error_type.__name__}"
+                    )
                 self.output(
                     application=application,
                     version=version,
